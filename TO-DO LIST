@@ -1,48 +1,57 @@
-class ToDoList:
-    def __init__(self):
+import tkinter as tk
+from tkinter import messagebox
+
+class ToDoListApp:
+    def __init__(self, master):
+        self.master = master
+        self.master.title("To-Do List App")
+
         self.tasks = []
+        self.task_var = tk.StringVar()
 
-    def add_task(self, task):
-        self.tasks.append(task)
-        print(f'Task "{task}" added.')
+        # Entry for adding tasks
+        self.task_entry = tk.Entry(master, textvariable=self.task_var, width=30)
+        self.task_entry.grid(row=0, column=0, padx=10, pady=10)
 
-    def remove_task(self, task):
-        if task in self.tasks:
-            self.tasks.remove(task)
-            print(f'Task "{task}" removed.')
+        # Buttons for actions
+        self.add_button = tk.Button(master, text="Add Task", command=self.add_task)
+        self.add_button.grid(row=0, column=1, padx=5)
+
+        self.remove_button = tk.Button(master, text="Remove Task", command=self.remove_task)
+        self.remove_button.grid(row=1, column=1, pady=5)
+
+        # Listbox for displaying tasks
+        self.task_listbox = tk.Listbox(master, selectmode=tk.SINGLE, width=40, height=10)
+        self.task_listbox.grid(row=2, column=0, columnspan=2, padx=10, pady=10)
+
+        # Populate initial tasks
+        self.update_task_listbox()
+
+    def add_task(self):
+        task = self.task_var.get()
+        if task:
+            self.tasks.append(task)
+            self.update_task_listbox()
+            self.task_var.set("")  # Clear the entry
         else:
-            print(f'Task "{task}" not found.')
+            messagebox.showwarning("Warning", "Please enter a task.")
 
-    def view_tasks(self):
-        if not self.tasks:
-            print("No tasks in the list.")
+    def remove_task(self):
+        selected_index = self.task_listbox.curselection()
+        if selected_index:
+            selected_task = self.task_listbox.get(selected_index[0])
+            self.tasks.remove(selected_task)
+            self.update_task_listbox()
         else:
-            print("Tasks:")
-            for index, task in enumerate(self.tasks, start=1):
-                print(f'{index}. {task}')
+            messagebox.showwarning("Warning", "Please select a task to remove.")
 
-# Example usage
-todo_list = ToDoList()
+    def update_task_listbox(self):
+        self.task_listbox.delete(0, tk.END)
+        for task in self.tasks:
+            self.task_listbox.insert(tk.END, task)
 
-while True:
-    print("\nTo-Do List Menu:")
-    print("1. Add Task")
-    print("2. Remove Task")
-    print("3. View Tasks")
-    print("4. Exit")
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = ToDoListApp(root)
+    root.mainloop()
 
-    choice = input("Enter your choice (1-4): ")
-
-    if choice == '1':
-        task = input("Enter task: ")
-        todo_list.add_task(task)
-    elif choice == '2':
-        task = input("Enter task to remove: ")
-        todo_list.remove_task(task)
-    elif choice == '3':
-        todo_list.view_tasks()
-    elif choice == '4':
-        print("Exiting To-Do List. Goodbye!")
-        break
-    else:
-        print("Invalid choice. Please enter a number from 1 to 4.")
